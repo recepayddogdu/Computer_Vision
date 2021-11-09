@@ -259,3 +259,177 @@ cv2.imshow("text", img)
 ```
 
 ![Untitled](images/Untitled%2010.png)
+
+## Görüntü Birleştirme
+
+```python
+import cv2
+import numpy as np
+
+#resmi ice aktar
+img = cv2.resize(cv2.imread("lenna.png"),(256,256))
+
+cv2.imshow("original", img)
+
+#horizontal (yatay) birleştirme
+hor = np.hstack((img,img))
+cv2.imshow("horizontal", hor)
+```
+
+![Untitled](images/Untitled%2011.png)
+
+```python
+#vertical (dikey) birleştirme
+ver = np.vstack((img,img))
+cv2.imshow("vertical", ver)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![Untitled](images/Untitled%2012.png)
+
+## Perspektif Çarpıtma (Warp Perspective)
+
+Point1 ve Point2 belirlememiz gerekiyor. Point1'de yamuk resmimizin köşelerinin piksel değerleri yer alacak. Görüntüyü Paint ile açtığımızda sol alt köşede imlecin yer aldığı pikselin değerleri gözükmekte.
+
+![Untitled](images/Untitled%2013.png)
+
+Sol üst köşeden başlayıp  köşeleri dolaştığımızda sırasıyla köşe noktaların koordinatları;
+
+- (204,3) - sol üst
+- (2,474) - sol alt
+- (540,147) - sağ üst
+- (340,617) - sağ alt
+
+olarak belirlendi.
+
+Point2 olarak ise dönüştürmek istediğimiz yeni köşe koordinatlarını belirlememiz gerekiyor.
+
+`cv2.getPerspectiveTransform()` fonksiyonu ile iki noktayı verdikten sonra transform için gerekli olan matrix otomatik olarak oluşturulmuş olacak.
+
+```python
+import cv2
+import numpy as np
+
+img = cv2.imread("kart.png")
+
+cv2.imshow("original", img)
+
+width = 400
+height = 500
+
+#cevirmek istenilen koseler
+pts1 = np.float32([[204,3],[2,474],[540,147],[340,617]])
+
+pts2 = np.float32([[0,0],[0, height],[width,0],[width,height]])
+
+matrix = cv2.getPerspectiveTransform(pts1, pts2)
+
+# nihai donusturulmus resim
+imgOutput = cv2.warpPerspective(img, matrix, (width,height))
+
+cv2.imshow("nihai resim", imgOutput)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
+![Untitled](images/Untitled%2014.png)
+
+## Görüntüleri Karıştırmak (Blending)
+
+İki görüntüyü alpha ve beta katsayıları ile birbirine karıştıralım;
+
+![Untitled](images/Untitled%2015.png)
+
+![Untitled](images/Untitled%2016.png)
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+
+img1 = cv2.imread("img1.JPG")
+img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+img2 = cv2.imread("img2.JPG")
+img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2RGB)
+
+plt.figure()
+plt.imshow(img1)
+
+plt.figure()
+plt.imshow(img2)
+
+#birlestirmek icin shape'ler aynı boyutta olmak zorunda
+print(img1.shape)
+print(img2.shape)
+
+img1 = cv2.resize(img1, (600,600))
+print(img1.shape)
+
+img2 = cv2.resize(img2, (600,600))
+print(img2.shape)
+
+plt.figure()
+plt.imshow(img1)
+
+plt.figure()
+plt.imshow(img2)
+
+#karistirilmis resim = alpha*img1+beta*img2
+blended=cv2.addWeighted(src1=img1, alpha=0.5,
+                        src2=img2, beta=0.5,
+                        gamma=0)
+plt.figure()
+plt.imshow(blended)
+```
+
+![Untitled](images/Untitled%2017.png)
+
+## Görüntü Eşikleme
+
+Görüntülerdeki siyaha yakın pikseller 0'a yakın, beyaza yakın pikseller ise 255'e yakın değerler alır. Bu değerler ile görüntü eşikleme yöntemi uygulanarak görüntüdeki detaylar yok edilebilir ve ana hat elde edilebilir.
+
+Örneğin görüntüdeki 60 değerine threshold uygulandığından aşağıdaki gibi sonuç elde edilir;
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+
+img = cv2.imread("img1.jpg")
+img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# %matplotlib auto
+plt.figure()
+plt.imshow(img, cmap = "gray")
+plt.axis("off")
+plt.show()
+
+#esikleme
+
+_, thresh_img = cv2.threshold(img, thresh=60, maxval=255,
+                              type=cv2.THRESH_BINARY)
+#THRESH_BINARY_INV ile tam tersi yapilabilir
+plt.figure()
+plt.imshow(thresh_img, cmap="gray")
+plt.axis("off")
+plt.show()
+```
+
+![Untitled](images/Untitled%2018.png)
+
+Görüntüde bir bütün olan alanlar var, örneğin dağ, ağaç vs gibi. Threshold uygulanırken bu nesnelerin bölünmesi istenmeyebilir. Ya tamamı kaldırılmak istenir ya da tamamı dursun istenir. Bunun çözümü `adaptive threshold` yöntemidir.
+
+```python
+#Adaptive Threshold
+thresh_img2 = cv2.adaptiveThreshold(img, 255, 
+                                       cv2.ADAPTIVE_THRESH_MEAN_C,
+                                       cv2.THRESH_BINARY,
+                                       11, 8)
+
+plt.figure()
+plt.imshow(thresh_img2, cmap="gray")
+plt.axis("off")
+plt.show()
+```
+
+![Untitled](images/Untitled%2019.png)
