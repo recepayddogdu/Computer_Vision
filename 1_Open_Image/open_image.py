@@ -1,7 +1,7 @@
 import cv2
 
 #ice aktarma
-img = cv2.imread("messi5.jpg", 0)
+img = cv2.imread("1_Open_Image\messi5.jpg", 0)
 
 #Gorsellestirme
 cv2.imshow("ilk resim", img)
