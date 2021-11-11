@@ -433,3 +433,403 @@ plt.show()
 ```
 
 ![Untitled](images/Untitled%2019.png)
+
+## Bulanıklaştırma (Blurring)
+
+![Untitled](images/Untitled%2020.png)
+
+### Ortalama Bulanıklaştırma
+
+![Untitled](images/Untitled%2021.png)
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
+# blurring(detayi azaltmak icin)
+img = cv2.cvtColor(cv2.imread("10_blurring/NYC.jpg"), cv2.COLOR_BGR2RGB)
+
+plt.figure(),plt.imshow(img),plt.axis("off")
+plt.title("original")
+
+# Ortalama bulaniklastirma ornegi
+dst2 = cv2.blur(img, ksize=(3,3))
+plt.figure(), plt.imshow(dst2), plt.axis("off")
+plt.title("Mean Blurring"), plt.show()
+```
+
+![Untitled](images/Untitled%2022.png)
+
+### Gaus Bulanıklaştırma
+
+![Untitled](images/Untitled%2023.png)
+
+```python
+#Gaussian blur ornegi
+gb = cv2.GaussianBlur(img, ksize=(3,3), sigmaX=7)
+plt.figure(), plt.imshow(gb), plt.axis("off")
+plt.title("Gaussian Blur"), plt.show()
+```
+
+![Untitled](images/Untitled%2024.png)
+
+### Medyan Bulanıklaştırma
+
+![Untitled](images/Untitled%2025.png)
+
+```python
+# Medyan blur ornegi
+mb = cv2.medianBlur(img, ksize=3)
+plt.figure(), plt.imshow(mb), plt.axis("off")
+plt.title("Median Blur"), plt.show()
+```
+
+![Untitled](images/Untitled%2026.png)
+
+Filtrelerin işe yaradığını daha iyi görmek için görüntü üzerinde noise oluşturabiliriz;
+
+```python
+#Noise eklenebilmesi icin goruntunun 0-1 arasi normalize edilmesi gerekir
+img = cv2.cvtColor(cv2.imread("10_blurring/NYC.jpg"),
+                    cv2.COLOR_BGR2RGB)/255 #normalize edilmis goruntu
+
+plt.figure(), plt.imshow(img), plt.axis("off")
+plt.title("Normalized Image")
+
+gaussianNoisyImage = gaussianNoise(img)
+plt.figure(), plt.imshow(gaussianNoisyImage), plt.axis("off")
+plt.title("gaussianNoisyImage"), plt.show()
+```
+
+![Untitled](images/Untitled%2027.png)
+
+### Gaussian Blur ile Noise Azaltma
+
+```python
+#gauss blur
+gb2 = cv2.GaussianBlur(gaussianNoisyImage, ksize=(3,3), sigmaX=7)
+plt.figure(), plt.imshow(gb2), plt.axis("off")
+plt.title("with Gaussian Blur"), plt.show()
+```
+
+![Untitled](images/Untitled%2028.png)
+
+### Salt Paper Noise
+
+```python
+# salt pepper noise
+def saltPepperNoise(image):
+
+    row, col, ch = image.shape
+    s_vs_p = 0.5
+    amount = 0.004 #beyaz nokta sayisini belirler
+
+    noisy = np.copy(image)
+
+    # salt
+    num_salt = np.ceil(amount*image.size*s_vs_p)
+    coords = [np.random.randint(0, i-1, int(num_salt)) for i in image.shape]
+    noisy[coords] = 1
+
+    # pepper
+    num_pepper = np.ceil(amount*image.size*(1-s_vs_p))
+    coords = [np.random.randint(0, i-1, int(num_pepper)) for i in image.shape]
+    noisy[coords] = 0
+
+    return noisy
+
+spImage = saltPepperNoise(img)
+plt.figure(), plt.imshow(spImage), plt.axis("off")
+plt.title("SaltPepper Noise"), plt.show()
+```
+
+![Untitled](images/Untitled%2029.png)
+
+`medianBlur()` ile noise azaltma işlemi uygulayalım;
+
+```python
+mb2 = cv2.medianBlur(spImage.astype(np.float32), ksize=3)
+plt.figure(), plt.imshow(mb2), plt.axis("off")
+plt.title("with median Blur"), plt.show()
+```
+
+![Untitled](images/Untitled%2030.png)
+
+## Morfolojik (Morphological) Operasyonlar
+
+![Untitled](images/Untitled%2031.png)
+
+### Erozyon (Erode)
+
+![Untitled](images/Untitled%2032.png)
+
+Sınırları belirlememiz için ilk önce bir kutucuk belirlememiz gerekiyor, bu kutucuk resmi dolaşacak ve sınırları belirleyecek.
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
+img = cv2.imread("11_morphological/datai_team.jpg")
+plt.figure(), plt.imshow(img), plt.axis("off")
+plt.title("original")
+
+# Erozyon
+kernel = np.ones((5,5), dtype=np.uint8)
+# iterations: kac kez erozyon yapilacak
+result = cv2.erode(img, kernel, iterations=1)
+
+plt.figure(), plt.imshow(result), plt.axis("off")
+plt.title("Erode"), plt.show()
+```
+
+![Untitled](images/Untitled%2033.png)
+
+### Genişleme (Dilation)
+
+![Untitled](images/Untitled%2034.png)
+
+```python
+#Dilation
+result2 = cv2.dilate(img, kernel, iterations=1)
+plt.figure(), plt.imshow(result2), plt.axis("off")
+plt.title("Dilate"), plt.show()
+```
+
+![Untitled](images/Untitled%2035.png)
+
+### Açma (Opening)
+
+![Untitled](images/Untitled%2036.png)
+
+Beyaz gürültünün giderilmesinde kullanılır. Beyaz gürültü oluşturulması;
+
+```python
+# White Noise
+whiteNoise = np.random.randint(0,2, #0-1 arasinda
+                            img.shape[:2]) #ch dahil degil
+whiteNoise = whiteNoise*255
+plt.figure(), plt.imshow(whiteNoise, cmap="gray"), plt.axis("off")
+plt.title("WhiteNoise")
+
+noise_img = whiteNoise+img
+plt.figure(), plt.imshow(noise_img, cmap="gray"), plt.axis("off")
+plt.title("Noise Img")
+
+plt.show()
+```
+
+![Untitled](images/Untitled%2037.png)
+
+Opening işlemi;
+
+```python
+#Açılma (Opening)
+opening = cv2.morphologyEx(noise_img.astype(np.float32), cv2.MORPH_OPEN, kernel)
+
+plt.figure(), plt.imshow(opening, cmap="gray"), plt.axis("off")
+plt.title("Opening")
+```
+
+![Untitled](images/Untitled%2038.png)
+
+### Kapatma
+
+![Untitled](images/Untitled%2039.png)
+
+Kapatma işlemi siyah noise'ları yok etmek için kullanılır. Black noise oluşturma;
+
+```python
+#Black Noise
+blackNoise = np.random.randint(0,2, #0-1 arasinda
+                            img.shape[:2]) #ch dahil degil
+blackNoise = blackNoise*-255
+plt.figure(), plt.imshow(blackNoise, cmap="gray"), plt.axis("off")
+plt.title("BlackNoise")
+
+blackNoise_img = blackNoise+img
+blackNoise_img[blackNoise_img<=245]=0
+
+plt.figure(), plt.imshow(blackNoise_img, cmap="gray"), plt.axis("off")
+plt.title("BlackNoise Image")
+```
+
+![Untitled](images/Untitled%2040.png)
+
+Closing işlemi;
+
+```python
+#Kapatma (Closing)
+closing = cv2.morphologyEx(noise_img.astype(np.float32), cv2.MORPH_CLOSE, kernel)
+
+plt.figure(), plt.imshow(closing, cmap="gray"), plt.axis("off")
+plt.title("Closing")
+
+plt.show()
+```
+
+![Untitled](images/Untitled%2041.png)
+
+### Morfolojik Gradyan
+
+![Untitled](images/Untitled%2042.png)
+
+Kenar tespiti problemlerinin temel yöntemlerinden birisidir.
+
+```python
+#Morphological Gradient
+gradient = cv2.morphologyEx(img.astype(np.float32), cv2.MORPH_GRADIENT, kernel)
+
+plt.figure(), plt.imshow(gradient, cmap="gray"), plt.axis("off")
+plt.title("Gradient")
+plt.show()
+```
+
+![Untitled](images/Untitled%2043.png)
+
+## Gradyanlar (Gradients)
+
+![Untitled](images/Untitled%2044.png)
+
+X ve Y eksenlerindeki kenarların tespiti;
+
+```python
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+img = cv2.imread("12_gradients/sudoku.jpg", 0)
+
+plt.figure(), plt.imshow(img, cmap="gray"), plt.axis("off")
+plt.title("Original")
+
+# x eksenindeki gradyanlar (dikey kenarlar)
+sobelx = cv2.Sobel(img, ddepth=cv2.CV_16S, dx=1, dy=0, ksize=5)
+
+plt.figure(), plt.imshow(sobelx, cmap="gray"), plt.axis("off")
+plt.title("sobelx")
+
+# y eksenindeki gradyanlar (yatay kenarlar)
+sobely = cv2.Sobel(img, ddepth=cv2.CV_16S, dx=1, dy=0, ksize=5)
+
+plt.figure(), plt.imshow(sobely, cmap="gray"), plt.axis("off")
+plt.title("sobely")
+```
+
+![Untitled](images/Untitled%2045.png)
+
+Her iki eksendeki kenarları da Laplacian yöntemi ile tespit edebiliriz;
+
+```python
+#Laplacian gradient
+laplacian = cv2.Laplacian(img, ddepth=cv2.CV_16S)
+plt.figure(), plt.imshow(laplacian, cmap="gray"), plt.axis("off")
+plt.title("laplacian")
+```
+
+![Untitled](images/Untitled%2046.png)
+
+## Histogramlar
+
+![Untitled](images/Untitled%2047.png)
+
+Kırmızı ve maviden oluşan bir resimde histogram incelendiğinde piksellerin yarısının mavi değeri 255 ve kırmızı değerinin 0, diğer yarısının ise kırmızı değerinin 255 ve mavi değerinin 0 olacağı gözlemlenir. Yeşil renk ise tüm piksellerde 0 değerindedir çünkü hiç yeşil renk bulunmamaktadır.
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
+img = cv2.imread("13_histogram/red_blue.jpg")
+img_vis = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+plt.figure(), plt.imshow(img_vis), plt.axis("off")
+plt.title("original")
+
+print(img.shape)
+
+img_hist = cv2.calcHist([img], channels=[0], mask=None, histSize=[256], ranges=[0,256])
+print(img_hist.shape)
+plt.figure(), plt.plot(img_hist)
+
+color = ("b", "g", "r")
+plt.figure()
+for i, c in enumerate(color):
+    hist = cv2.calcHist([img], channels=[i], mask=None, histSize=[256], ranges=[0,256])
+    plt.plot(hist, color=c)
+plt.show()
+```
+
+![Untitled](images/Untitled%2048.png)
+
+Farklı görüntüler ile histogram örnekleri;
+
+Golden Gate resminden bir kısmı kolay incelemek için maskeleyip kırpalım;
+
+### Mask
+
+```python
+# Golden Gate Ornegi
+golden_gate = cv2.imread("13_histogram/goldenGate.jpg")
+golden_gate_vis = cv2.cvtColor(golden_gate, cv2.COLOR_BGR2RGB)
+
+plt.figure(), plt.imshow(golden_gate_vis), plt.axis("off")
+plt.title("GoldenGate")
+
+print(golden_gate.shape)
+
+#goruntu boyutunda maske olusturma
+mask = np.zeros(golden_gate.shape[:2], np.uint8)
+
+#belirli bir alan disinda tum pikselleri beyaz yap
+mask[1500:2000, 1000:2000] = 255
+plt.figure(), plt.imshow(mask, cmap="gray"), plt.title("mask")
+
+masked_img_vis = cv2.bitwise_and(golden_gate_vis,golden_gate_vis,mask=mask)
+plt.figure(), plt.imshow(masked_img_vis, cmap="gray"), plt.title("mask")
+
+masked_img = cv2.bitwise_and(golden_gate,golden_gate,mask=mask)
+
+plt.show()
+```
+
+![Untitled](images/Untitled%2049.png)
+
+### Histogram Oluşturma
+
+```python
+#histogram olusturma
+masked_img_hist_red = cv2.calcHist([masked_img], channels=[2], mask=mask, histSize=[256], ranges=[0,256])
+plt.figure(),plt.title("masked_img_hist_red"), plt.plot(masked_img_hist_red)
+masked_img_hist_green = cv2.calcHist([masked_img], channels=[1], mask=mask, histSize=[256], ranges=[0,256])
+plt.figure(),plt.title("masked_img_hist_green"), plt.plot(masked_img_hist_green)
+masked_img_hist_blue = cv2.calcHist([masked_img], channels=[0], mask=mask, histSize=[256], ranges=[0,256])
+plt.figure(),plt.title("masked_img_hist_blue"), plt.plot(masked_img_hist_blue)
+
+color = ("b", "g", "r")
+plt.figure()
+for i, c in enumerate(color):
+    masked_img_hist = cv2.calcHist([masked_img], channels=[i], mask=mask, histSize=[256], ranges=[0,256])
+    plt.plot(masked_img_hist, color=c)
+
+plt.show()
+```
+
+![Untitled](images/Untitled%2050.png)
+
+### Histogram Eşitleme (Equalization)
+
+Kontrastı arttırmamızı sağlar.
+
+![Untitled](images/Untitled%2051.png)
+
+Yukarıdaki gibi soluk renkli bir görüntüde kontrastı arttırarak anlaşılabilirliği, detayları daha da ortaya çıkarabiliriz.
+
+Renkler arasındaki kontrastı arttırarak 0-255 aralığını daha iyi kullanmak hedeflenir.
+
+![Untitled](images/Untitled%2052.png)
+
+![Untitled](images/Untitled%2053.png)
+
+120-200 arasına sıkışan dar bölgeyi 0-255 aralığına genişlettik.
