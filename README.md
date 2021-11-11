@@ -164,7 +164,7 @@ cv2.imshow("Cropped Image", imgCropped)
 
 Bir nesne tespiti yaptığımız zaman görüntü üzerine kutucuk çizmemiz, yazı yazmamız gerekebiliyor. Bu nedenle görüntü üzerine şekil ve metin eklemeye ihtiyaç duyuluyor.
 
-### Ç**izgi Ekleme**
+### Çizgi Ekleme
 
 ```python
 import cv2
@@ -189,7 +189,7 @@ if cv2.waitKey(0):
 
 ![Untitled](images/Untitled%205.png)
 
-### **Dikdörtgen Ekleme**
+### Dikdörtgen Ekleme
 
 ```python
 #dikdortgen ekleme
@@ -202,7 +202,7 @@ cv2.rectangle(img,       #resim
 
 ![Untitled](images/Untitled%206.png)
 
-### **Dikdörtgen Doldurma**
+### Dikdörtgen Doldurma
 
 ```python
 #dikdortgen ekleme
@@ -215,7 +215,7 @@ cv2.rectangle(img,       #resim
 
 ![Untitled](images/Untitled%207.png)
 
-### **Çember Çizimi**
+### Çember Çizimi
 
 ```python
 #cember cizimi
