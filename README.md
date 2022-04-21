@@ -1,5 +1,9 @@
 # Computer Vision Notes
 
+[Buraya tıklayarak Notion sayfamdan notları daha düzenli inceleyebilirsiniz.](https://recepaydogdu.notion.site/recepaydogdu/Computer-Vision-Notes-89cc43ef47cf40deb3240acb1ce7059c)
+
+[Kullanılan kaynaklar için tıklayınız.](kaynaklar.md)
+
 Görüntülerin koordinat ekseninde **x** ve **y** konumları aşağıdaki gibi olur;
 
 ![Untitled](images/Untitled.png)
