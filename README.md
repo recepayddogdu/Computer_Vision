@@ -1,6 +1,6 @@
 # Computer Vision Notes
 
-[Buraya tıklayarak Notion sayfamdan notları daha düzenli inceleyebilirsiniz.](https://recepaydogdu.notion.site/recepaydogdu/Computer-Vision-Notes-89cc43ef47cf40deb3240acb1ce7059c)
+[Buraya tıklayarak Notion sayfamdan notları daha düzenli inceleyebilirsiniz.](https://www.notion.so/recepaydogdu/Computer-Vision-with-OpenCV-39bc630761bc45cc9e8fdc986ada4241?pvs=4)
 
 [Kullanılan kaynaklar için tıklayınız.](kaynaklar.md)
 
